@@ -68,6 +68,77 @@ Dự án **Mini Sales Management** là hệ thống quản lý bán hàng đơn 
 
 ## 5. Thiết kế Database & Relationship (ERD)
 
+```mermaid
+erDiagram
+    employees ||--|| employee_profiles : "1 - 1 (hasOne)"
+    employees ||--o{ orders : "1 - N (creates)"
+    categories ||--o{ products : "1 - N (categorizes)"
+    orders ||--|{ order_items : "1 - N (contains)"
+    products ||--|{ order_items : "1 - N (included in)"
+
+    employees {
+        bigint id PK "Khóa chính"
+        string username UK "Tên đăng nhập"
+        string password "Mật khẩu Bcrypt"
+        string role "manager | sales_staff"
+        string status "active | inactive"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+
+    employee_profiles {
+        bigint id PK "Khóa chính"
+        bigint employee_id FK "Liên kết employees.id"
+        string name "Họ và tên"
+        string email UK "Email"
+        string phone "Số điện thoại"
+        string address "Địa chỉ"
+        string avatar "Ảnh đại diện"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+
+    categories {
+        bigint id PK "Khóa chính"
+        string name "Tên danh mục"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+
+    products {
+        bigint id PK "Khóa chính"
+        bigint category_id FK "Liên kết categories.id"
+        string name "Tên sản phẩm"
+        decimal price "Đơn giá"
+        text description "Mô tả"
+        string image "Ảnh sản phẩm"
+        string status "Đang bán | Ngừng bán"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+
+    orders {
+        bigint id PK "Khóa chính"
+        bigint employee_id FK "Liên kết employees.id"
+        string customer_name "Tên khách hàng"
+        string customer_phone "SĐT khách hàng"
+        decimal total_amount "Tổng tiền"
+        string status "Pending | Processing | Completed | Cancelled"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+
+    order_items {
+        bigint id PK "Khóa chính"
+        bigint order_id FK "Liên kết orders.id"
+        bigint product_id FK "Liên kết products.id"
+        int quantity "Số lượng"
+        decimal price "Giá bán"
+        timestamp created_at ""
+        timestamp updated_at ""
+    }
+```
+
 ### 5.1. Các bảng trong Database:
 1. `employees`: `id`, `username`, `password`, `role`, `status`, `remember_token`, `timestamps`.
 2. `employee_profiles`: `id`, `employee_id` (FK), `name`, `email`, `phone`, `address`, `avatar`, `timestamps`.
