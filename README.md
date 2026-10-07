@@ -1,4 +1,4 @@
-# FINAL PROJECT – MINI SALES MANAGEMENT (Quản lý bán hàng)
+﻿# FINAL PROJECT – MINI SALES MANAGEMENT (Quản lý bán hàng)
 > Bài tập cuối khóa đào tạo BRSE (Bridge Software Engineer)
 
 ---
@@ -159,40 +159,28 @@ erDiagram
 
 ## 6. Sơ đồ System Flow (Mục 8 trong yêu cầu)
 
-Khi người dùng thực hiện thao tác (Ví dụ: Thêm một sản phẩm mới):
+Luồng tuần tự khi người dùng thực hiện thao tác (Ví dụ: Thêm sản phẩm mới hoặc Tạo đơn hàng):
 
-```
-+----------------+        1. Điền thông tin Form & Submit
-|  Người dùng    | =============================================> [Trình duyệt Web / Browser]
-|  (User)        |                                                          ||
-+----------------+                                                          || 2. Gửi HTTP POST /products
-                                                                            \/
-                                                                  [Route: routes/web.php]
-                                                                            ||
-                                                                            || 3. Điều hướng tới Controller
-                                                                            \/
-                                                           [ProductController::store(Request $request)]
-                                                                            ||
-                                                                            || 4. Validate dữ liệu & Lưu file ảnh
-                                                                            ||
-                                                                            \/
-                                                                 [Model: App\Models\Product]
-                                                                            ||
-                                                                            || 5. Thực thi câu lệnh SQL INSERT
-                                                                            \/
-                                                                  [MySQL Database: table 'products']
-                                                                            ||
-                                                                            || 6. Trả về kết quả ghi thành công
-                                                                            \/
-                                                               [ProductController tạo Redirect/Flash session]
-                                                                            ||
-                                                                            || 7. Render giao diện View
-                                                                            \/
-                                                                [Blade View: products/index.blade.php]
-                                                                            ||
-                                                                            || 8. Trả về mã HTML thuần kèm thông báo thành công
-                                                                            \/
-                                                                  [Trình duyệt hiển thị cho người dùng]
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Người dùng (Browser)
+    participant Route as routes/web.php
+    participant Controller as ProductController / OrderController
+    participant Model as Eloquent Model
+    participant DB as MySQL Database
+    participant View as Blade View Template
+
+    User->>Route: 1. Điền Form & gửi HTTP POST (/products)
+    Route->>Controller: 2. Điều hướng tới Controller::store()
+    Controller->>Controller: 3. Validate dữ liệu & xử lý upload ảnh
+    Controller->>Model: 4. Gọi Model::create()
+    Model->>DB: 5. Thực thi câu lệnh SQL INSERT
+    DB-->>Model: 6. Trả về kết quả ghi dữ liệu thành công
+    Model-->>Controller: 7. Trả về instance Product vừa tạo
+    Controller->>View: 8. Chuyển hướng kèm Flash Message (with success)
+    View-->>Controller: 9. Biên dịch Blade Template thành mã HTML thuần
+    Controller-->>User: 10. Trả về HTTP 200/302 hiển thị trên trình duyệt
 ```
 
 ---
@@ -200,7 +188,21 @@ Khi người dùng thực hiện thao tác (Ví dụ: Thêm một sản phẩm m
 ## 7. Quy trình Deploy lên Server thực tế (Mục 10 trong yêu cầu)
 
 ### 7.1. Luồng xử lý khi người dùng gõ Domain trên trình duyệt:
-$$\text{Domain (minisales.com)} \longrightarrow \text{DNS (Phân giải IP)} \longrightarrow \text{Nginx (Port 80/443)} \longrightarrow \text{PHP-FPM (Socket/Port 9000)} \longrightarrow \text{Laravel (index.php)} \longrightarrow \text{MySQL (Port 3306)}$$
+
+```mermaid
+graph TD
+    A[Client nhập domain (minisales.com)] --> B[DNS Server: Phân giải IP Server]
+    B --> C[Nginx Web Server: Port 80 / 443 SSL]
+    C -->|Static Files: CSS / JS / Images| D[Public Directory (storage, css, js)]
+    C -->|Dynamic PHP Request qua FastCGI| E[PHP-FPM: Port 9000 / Unix Socket]
+    E --> F[Laravel Entry Point: public/index.php]
+    F --> G[Kernel, Middleware, Routes, Controllers]
+    G --> H[(MySQL Database: Port 3306)]
+    H --> G
+    G --> E
+    E --> C
+    C --> A
+```
 
 1. **Domain & DNS**: Trình duyệt gửi truy vấn DNS để chuyển đổi tên miền `minisales.com` thành địa chỉ IP công khai của máy chủ (Server IP).
 2. **Nginx Web Server**: Nhận request HTTPS tại cổng 443, thực hiện giải mã SSL (Certbot Let's Encrypt), phục vụ các file tĩnh (CSS, JS, Images). Nếu là request PHP, Nginx chuyển tiếp (proxy) qua giao thức FastCGI tới PHP-FPM.
