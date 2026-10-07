@@ -111,7 +111,7 @@ graph TD
     C -->|Dynamic PHP Request qua FastCGI| E[PHP-FPM Pool: Cổng 9000 hoặc Unix Socket]
     E --> F[Laravel Core: public/index.php]
     F --> G[Xử lý Routing, Middleware, Controller]
-    G --> H[(MySQL Database Server: Cổng 3306)]
+    G --> H[("MySQL Database Server: Cổng 3306")]
     H --> G
     G --> E
     E --> C

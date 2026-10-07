@@ -191,13 +191,13 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    A[Client nhập domain (minisales.com)] --> B[DNS Server: Phân giải IP Server]
-    B --> C[Nginx Web Server: Port 80 / 443 SSL]
-    C -->|Static Files: CSS / JS / Images| D[Public Directory (storage, css, js)]
-    C -->|Dynamic PHP Request qua FastCGI| E[PHP-FPM: Port 9000 / Unix Socket]
-    E --> F[Laravel Entry Point: public/index.php]
-    F --> G[Kernel, Middleware, Routes, Controllers]
-    G --> H[(MySQL Database: Port 3306)]
+    A["Client nhập domain (minisales.com)"] --> B["DNS Server: Phân giải IP Server"]
+    B --> C["Nginx Web Server: Port 80 / 443 SSL"]
+    C -->|"Static Files: CSS / JS / Images"| D["Public Directory (storage, css, js)"]
+    C -->|"Dynamic PHP Request qua FastCGI"| E["PHP-FPM: Port 9000 / Unix Socket"]
+    E --> F["Laravel Entry Point: public/index.php"]
+    F --> G["Kernel, Middleware, Routes, Controllers"]
+    G --> H[("MySQL Database: Port 3306")]
     H --> G
     G --> E
     E --> C
