@@ -1,28 +1,38 @@
-﻿# FINAL PROJECT – MINI SALES MANAGEMENT (Quản lý bán hàng)
+# FINAL PROJECT – MINI SALES MANAGEMENT (Quản lý bán hàng)
 > Bài tập cuối khóa đào tạo BRSE (Bridge Software Engineer)
 
 ---
 
 ## 1. Giới thiệu dự án
-Dự án **Mini Sales Management** là hệ thống quản lý bán hàng đơn giản xây dựng trên nền tảng **Laravel (PHP)** và **MySQL**, áp dụng mô hình **MVC** (Model - View - Controller), giao diện **HTML/CSS (Flexbox & Responsive)**, phân quyền người dùng và flow hệ thống theo tiêu chuẩn đào tạo BRSE.
+Dự án **Mini Sales Management - Dior Beauty** là hệ thống quản lý bán hàng mỹ phẩm cao cấp (Christian Dior Paris) được xây dựng trên nền tảng **Laravel (PHP)** và **MySQL**, áp dụng mô hình **MVC** (Model - View - Controller), giao diện thiết kế chuẩn thời trang **Haute Couture Luxury (HTML5/CSS3 Flexbox & Grid Responsive)**, phân quyền người dùng và flow hệ thống theo tiêu chuẩn đào tạo BRSE.
 
 ---
 
 ## 2. Tech Stack sử dụng
 - **Backend**: PHP 8.1+ / Laravel 10 (MVC, Eloquent ORM, Migrations, Route, Controller, Custom Middleware).
 - **Database**: MySQL 8.0 (Quan hệ 1-1, 1-N, N-N).
-- **Frontend**: Blade Template Engine, HTML5, CSS3 (Flexbox layout, Responsive đa thiết bị), JavaScript thuần (DOM, tính toán giỏ hàng realtime, confirm popup). *Không dùng React/Vue*.
+- **Frontend**: Blade Template Engine, HTML5, CSS3 thuần (Flexbox & Grid layout, Responsive đa thiết bị, Design System sang trọng), JavaScript thuần (DOM, tính toán giỏ hàng realtime, confirm popup). *Không dùng React/Vue/TailwindCSS*.
 - **Môi trường phát triển**: Laragon (Apache/Nginx, PHP, MySQL, Composer).
 
 ---
 
 ## 3. Danh sách tài khoản thử nghiệm (Seeded Data)
 
-| Username | Password | Vai trò (Role) | Họ và tên | Quyền hạn |
+| Username | Password | Vai trò (Role) | Họ và tên | Quyền hạn & Phân quyền |
 | :--- | :--- | :--- | :--- | :--- |
-| `admin` | `password123` | **Quản lý (Manager)** | Nguyễn Quản Lý | Quản lý toàn bộ đơn hàng của tất cả nhân viên, quản lý tài khoản & profile nhân viên, sản phẩm, danh mục |
-| `sales1` | `password123` | **Nhân viên (Sales Staff)** | Trần Thị Thu Hà | Chỉ xem & quản lý các đơn hàng do chính mình tạo, tạo đơn hàng mới, xem sản phẩm/danh mục |
-| `sales2` | `password123` | **Nhân viên (Sales Staff)** | Lê Hoàng Nam | Chỉ xem & quản lý các đơn hàng do chính mình tạo |
+| `admin` | `password123` | **Quản lý (Manager)** | **Nguyễn Văn Admin** | Toàn quyền hệ thống: Quản lý danh mục, sản phẩm, tất cả đơn hàng, quản lý và cấp quyền nhân viên |
+| `sales1` | `password123` | **Nhân viên (Sales Staff)** | **Nguyễn Thị Sale1** | Tạo đơn hàng mới, xem sản phẩm & danh mục, chỉ quản lý các đơn hàng do chính mình phụ trách |
+| `sales2` | `password123` | **Nhân viên (Sales Staff)** | **Nguyễn Thị Sale2** | Tạo đơn hàng mới, xem sản phẩm & danh mục, chỉ quản lý các đơn hàng do chính mình phụ trách |
+
+### 3.1. Dữ liệu ngành hàng & Sản phẩm mẫu (Dior Beauty)
+- **4 Danh mục chính**: `Son`, `Cushion`, `Nước Hoa`, `Phấn Má` (Trên Dashboard và Sidebar, menu **Quản lý danh mục** được xếp ưu tiên bên trên **Quản lý sản phẩm**).
+- **Các sản phẩm Dior tiêu biểu kèm ảnh thương mại thực tế**:
+  1. *Son Thỏi Rouge Dior Velvet 999 Iconic Red* (`products/dior-lipstick.jpg`)
+  2. *Son Kem Dior Addict Lip Tint Natural Berry* (`products/dior-tint.jpg`)
+  3. *Phấn Nước Dior Prestige Le Cushion Teint de Rose* (`products/dior-cushion.jpg`)
+  4. *Nước Hoa Nữ Dior J’adore Eau de Parfum 100ml* (`products/dior-perfume.jpg`)
+  5. *Nước Hoa Nữ Miss Dior Eau de Parfum 100ml* (`products/miss-dior.jpg`)
+  6. *Phấn Má Hồng Dior Rosy Glow 001 Petal Pink* (`products/dior-blush.jpg`)
 
 ---
 
@@ -237,20 +247,26 @@ graph TD
 ## 9. Hướng dẫn chạy dự án trên máy tính nội bộ (Local)
 
 1. Mở phần mềm **Laragon** và nhấn **Start All** (khởi động Apache/Nginx và MySQL).
-2. Mở Terminal / PowerShell tại thư mục dự án `C:\laragon\www\Project_mini`.
-3. Chạy lệnh kiểm tra database hoặc reset dữ liệu mẫu:
+2. Nhấn nút **Terminal** trên giao diện chính của Laragon (hoặc mở PowerShell tại thư mục `C:\laragon\www\Project_mini`).
+3. Khởi tạo lại toàn bộ bảng và nạp dữ liệu mẫu mới nhất (Dior Beauty):
    ```bash
    php artisan migrate:fresh --seed
    ```
-4. Chạy tạo liên kết lưu trữ ảnh sản phẩm:
+   *(Nếu dùng PowerShell bên ngoài mà chưa cấu hình biến môi trường PATH cho PHP, chạy: `& 'C:\laragon\bin\php\php-8.1.10-Win32-vs16-x64\php.exe' artisan migrate:fresh --seed`)*
+4. Tạo liên kết lưu trữ hình ảnh sản phẩm ra thư mục công khai:
    ```bash
    php artisan storage:link
    ```
-5. Khởi động server (nếu không dùng virtual host của Laragon):
+5. Xóa sạch bộ nhớ đệm (View, Route, Config) để cập nhật giao diện mới nhất:
+   ```bash
+   php artisan view:clear && php artisan route:clear && php artisan config:clear
+   ```
+6. Khởi động server nội bộ (nếu không dùng virtual host của Laragon):
    ```bash
    php artisan serve
    ```
-6. Truy cập trình duyệt tại địa chỉ: `http://localhost:8000` (hoặc `http://project_mini.test` trên Laragon).
-7. Đăng nhập bằng tài khoản:
-   - **Quản lý**: `admin` / `password123`
-   - **Nhân viên**: `sales1` / `password123`
+7. Truy cập trình duyệt tại địa chỉ: `http://localhost:8000` (hoặc `http://project_mini.test` trên Laragon).
+8. Đăng nhập bằng tài khoản thử nghiệm:
+   - **Quản lý (Manager)**: `admin` / `password123` &rarr; Họ tên: **Nguyễn Văn Admin**
+   - **Nhân viên 1 (Sales)**: `sales1` / `password123` &rarr; Họ tên: **Nguyễn Thị Sale1**
+   - **Nhân viên 2 (Sales)**: `sales2` / `password123` &rarr; Họ tên: **Nguyễn Thị Sale2**
