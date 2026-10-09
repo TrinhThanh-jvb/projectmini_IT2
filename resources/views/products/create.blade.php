@@ -1,3 +1,8 @@
+{{-- 
+    View: Thêm sản phẩm mới (Products Create).
+    Cung cấp form nhập thông tin sản phẩm: Tên, danh mục, đơn giá,
+    trạng thái kinh doanh, tải lên file hình ảnh và mô tả chi tiết.
+--}}
 @extends('layouts.app')
 
 @section('title', 'Thêm sản phẩm mới')
@@ -5,21 +10,25 @@
 
 @section('content')
 <div class="panel">
+    {{-- Thanh tiêu đề khung và nút quay lại --}}
     <div class="panel-header">
         <h2 class="panel-title">Nhập thông tin sản phẩm</h2>
         <a href="{{ route('products.index') }}" class="btn btn-secondary btn-sm">Quay lại danh sách</a>
     </div>
 
     <div style="padding: 24px;">
+        {{-- Form gửi request POST tới ProductController::store có hỗ trợ upload file (multipart/form-data) --}}
         <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="form-grid">
+                {{-- Tên sản phẩm --}}
                 <div class="form-group">
                     <label for="name" class="form-label">Tên sản phẩm <span style="color: red;">*</span></label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" placeholder="VD: iPhone 15 Pro Max..." required>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" placeholder="VD: Dior Lip Stick..." required>
                 </div>
 
+                {{-- Chọn danh mục --}}
                 <div class="form-group">
                     <label for="category_id" class="form-label">Danh mục <span style="color: red;">*</span></label>
                     <select id="category_id" name="category_id" class="form-control" required>
@@ -32,31 +41,36 @@
                     </select>
                 </div>
 
+                {{-- Đơn giá --}}
                 <div class="form-group">
                     <label for="price" class="form-label">Đơn giá (VNĐ) <span style="color: red;">*</span></label>
                     <input type="number" id="price" name="price" step="1000" min="0" class="form-control" value="{{ old('price') }}" placeholder="VD: 25000000" required>
                 </div>
 
+                {{-- Trạng thái bán --}}
                 <div class="form-group">
                     <label for="status" class="form-label">Trạng thái kinh doanh <span style="color: red;">*</span></label>
                     <select id="status" name="status" class="form-control" required>
                         <option value="Đang bán" {{ old('status', 'Đang bán') === 'Đang bán' ? 'selected' : '' }}>Đang bán</option>
-                        <option value="Ngừng bán" {{ old('status') === 'Ngừng bán' ? 'selected' : '' }}>Ngừng bán</option>
+                        <option value="Ngừng bán" {{ old('status', 'Ngừng bán') === 'Ngừng bán' ? 'selected' : '' }}>Ngừng bán</option>
                     </select>
                 </div>
             </div>
 
+            {{-- Tải file ảnh sản phẩm --}}
             <div class="form-group">
                 <label for="image" class="form-label">Hình ảnh sản phẩm</label>
                 <input type="file" id="image" name="image" class="form-control" accept="image/*">
                 <small style="color: var(--text-muted); font-size: 12px;">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</small>
             </div>
 
+            {{-- Mô tả sản phẩm --}}
             <div class="form-group">
                 <label for="description" class="form-label">Mô tả sản phẩm</label>
                 <textarea id="description" name="description" rows="5" class="form-control" placeholder="Mô tả chi tiết cấu hình, tính năng, đặc điểm sản phẩm...">{{ old('description') }}</textarea>
             </div>
 
+            {{-- Nút bấm --}}
             <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                 <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy bỏ</a>
                 <button type="submit" class="btn btn-primary">

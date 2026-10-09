@@ -1,15 +1,25 @@
+{{-- 
+    View: Quản lý danh sách đơn hàng (Orders Index).
+    Giao diện gồm:
+    1. Bộ lọc và tìm kiếm theo tên khách hàng / số điện thoại và trạng thái đơn hàng (Pending, Processing, Completed, Cancelled)
+    2. Nút tạo đơn hàng mới
+    3. Bảng dữ liệu đơn hàng (Phân quyền: Manager thấy mọi đơn, Sales Staff chỉ thấy đơn của bản thân)
+    4. Thao tác xem chi tiết hoặc xóa đơn
+--}}
 @extends('layouts.app')
 
 @section('title', 'Quản lý đơn hàng')
 @section('page_title', 'Danh sách đơn hàng')
 
 @section('content')
-<!-- Filter bar -->
+{{-- ================= THANH TÌM KIẾM VÀ BỘ LỌC ĐƠN HÀNG ================= --}}
 <form action="{{ route('orders.index') }}" method="GET" class="filter-bar">
+    {{-- Ô tìm kiếm theo tên hoặc SĐT khách hàng --}}
     <div class="search-input">
         <input type="text" name="search" class="form-control" placeholder="🔍 Tìm theo tên khách hàng hoặc SĐT..." value="{{ request('search') }}">
     </div>
 
+    {{-- Lọc theo trạng thái đơn hàng --}}
     <div class="select-control">
         <select name="status" class="form-control">
             <option value="">-- Tất cả trạng thái --</option>
@@ -20,16 +30,19 @@
         </select>
     </div>
 
+    {{-- Nút lọc dữ liệu --}}
     <button type="submit" class="btn btn-secondary">
         <span>Lọc</span>
     </button>
 
+    {{-- Nút reset bộ lọc nếu có điều kiện tìm kiếm --}}
     @if(request()->anyFilled(['search', 'status']))
         <a href="{{ route('orders.index') }}" class="btn btn-secondary" style="color: var(--danger);">
             <span>Xóa lọc</span>
         </a>
     @endif
 
+    {{-- Nút tạo đơn hàng mới --}}
     <div style="margin-left: auto;">
         <a href="{{ route('orders.create') }}" class="btn btn-primary">
             <span>➕ Tạo đơn hàng mới</span>
@@ -37,7 +50,7 @@
     </div>
 </form>
 
-<!-- Orders Table Panel -->
+{{-- ================= BẢNG DANH SÁCH ĐƠN HÀNG ================= --}}
 <div class="panel">
     <div class="panel-header">
         <h2 class="panel-title">
@@ -61,20 +74,26 @@
                 </tr>
             </thead>
             <tbody>
+                {{-- Lặp qua từng đơn hàng trong trang hiện tại --}}
                 @forelse($orders as $order)
                     <tr>
+                        {{-- Mã đơn định dạng 4 chữ số (ví dụ: #0001) --}}
                         <td><strong>#{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</strong></td>
                         <td style="font-weight: 600;">{{ $order->customer_name }}</td>
                         <td>{{ $order->customer_phone }}</td>
+                        {{-- Tên nhân viên phụ trách đơn --}}
                         <td>
                             <span class="badge badge-secondary">
                                 {{ $order->employee->profile->name ?? $order->employee->username }}
                             </span>
                         </td>
+                        {{-- Số loại sản phẩm có trong đơn hàng --}}
                         <td>{{ $order->orderItems->count() }} sản phẩm</td>
+                        {{-- Tổng giá trị đơn hàng --}}
                         <td style="font-weight: 700; color: var(--primary);">
                             {{ number_format($order->total_amount) }} đ
                         </td>
+                        {{-- Huy hiệu trạng thái --}}
                         <td>
                             @if($order->status === 'Pending')
                                 <span class="badge badge-warning">Pending</span>
@@ -86,9 +105,11 @@
                                 <span class="badge badge-danger">Cancelled</span>
                             @endif
                         </td>
+                        {{-- Thời điểm tạo đơn --}}
                         <td style="color: var(--text-muted); font-size: 13px;">
                             {{ $order->created_at->format('d/m/Y H:i') }}
                         </td>
+                        {{-- Nút Xem chi tiết & Xóa --}}
                         <td style="text-align: right;">
                             <div style="display: inline-flex; gap: 6px;">
                                 <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary btn-sm" title="Xem chi tiết">
@@ -115,6 +136,7 @@
         </table>
     </div>
 
+    {{-- Phân trang (Pagination) --}}
     @if($orders->hasPages())
         <div style="padding: 20px; display: flex; justify-content: flex-end;">
             {{ $orders->links() }}

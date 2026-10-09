@@ -11,14 +11,27 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 
+/**
+ * Class DatabaseSeeder: Khởi tạo dữ liệu mẫu ban đầu cho toàn bộ hệ thống.
+ * 
+ * Dữ liệu khởi tạo gồm:
+ * 1. 3 Nhân viên (1 Quản lý: admin, 2 Nhân viên bán hàng: sales1, sales2) cùng hồ sơ đầy đủ
+ * 2. 4 Danh mục sản phẩm (Điện thoại, Máy tính, Phụ kiện, Thiết bị văn phòng)
+ * 3. 7 Sản phẩm công nghệ tiêu biểu kèm giá cả, mô tả và trạng thái bán
+ * 4. 3 Đơn hàng mẫu ở các trạng thái khác nhau (Completed, Processing, Pending) kèm chi tiết sản phẩm
+ */
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Chạy toàn bộ tiến trình gieo dữ liệu (Seed).
      */
     public function run(): void
     {
-        // 1. Seed Employees & Profiles
+        // =========================================================================
+        // 1. KHỞI TẠO TÀI KHOẢN NHÂN VIÊN & HỒ SƠ CÁ NHÂN (EMPLOYEES & PROFILES)
+        // =========================================================================
+
+        // 1.1. Tài khoản Quản lý (Admin / Manager)
         $manager = Employee::create([
             'username' => 'admin',
             'password' => Hash::make('password123'),
@@ -27,13 +40,14 @@ class DatabaseSeeder extends Seeder
         ]);
         EmployeeProfile::create([
             'employee_id' => $manager->id,
-            'name' => 'Nguyễn Quản Lý (Admin)',
-            'email' => 'admin@minisales.vn',
+            'name' => 'Nguyễn Văn Admin',
+            'email' => 'admin@diorbeauty.vn',
             'phone' => '0901234567',
-            'address' => 'Tòa nhà Landmark 72, Nam Từ Liêm, Hà Nội',
+            'address' => 'Dior Boutique, Tràng Tiền Plaza, Hoàn Kiếm, Hà Nội',
             'avatar' => null,
         ]);
 
+        // 1.2. Nhân viên bán hàng số 1: Nguyễn Thị Sale1
         $sales1 = Employee::create([
             'username' => 'sales1',
             'password' => Hash::make('password123'),
@@ -42,13 +56,14 @@ class DatabaseSeeder extends Seeder
         ]);
         EmployeeProfile::create([
             'employee_id' => $sales1->id,
-            'name' => 'Trần Thị Thu Hà (Sales 01)',
-            'email' => 'ha.tran@minisales.vn',
+            'name' => 'Nguyễn Thị Sale1',
+            'email' => 'sale1@diorbeauty.vn',
             'phone' => '0912345678',
-            'address' => 'Hải Châu, Đà Nẵng',
+            'address' => 'Vincom Center Đồng Khởi, Quận 1, TP. Hồ Chí Minh',
             'avatar' => null,
         ]);
 
+        // 1.3. Nhân viên bán hàng số 2: Nguyễn Thị Sale2
         $sales2 = Employee::create([
             'username' => 'sales2',
             'password' => Hash::make('password123'),
@@ -57,145 +72,143 @@ class DatabaseSeeder extends Seeder
         ]);
         EmployeeProfile::create([
             'employee_id' => $sales2->id,
-            'name' => 'Lê Hoàng Nam (Sales 02)',
-            'email' => 'nam.le@minisales.vn',
+            'name' => 'Nguyễn Thị Sale2',
+            'email' => 'sale2@diorbeauty.vn',
             'phone' => '0987654321',
-            'address' => 'Quận 1, TP. Hồ Chí Minh',
+            'address' => 'Lotte Mall West Lake, Tây Hồ, Hà Nội',
             'avatar' => null,
         ]);
 
-        // 2. Seed Categories
-        $catPhones = Category::create(['name' => 'Điện thoại']);
-        $catLaptops = Category::create(['name' => 'Máy tính']);
-        $catAccessories = Category::create(['name' => 'Phụ kiện']);
-        $catOffice = Category::create(['name' => 'Thiết bị văn phòng']);
+        // =========================================================================
+        // 2. KHỞI TẠO DANH MỤC SẢN PHẨM (CATEGORIES: Son, Cushion, Nước Hoa, Phấn Má)
+        // =========================================================================
+        $catSon = Category::create(['name' => 'Son']);
+        $catCushion = Category::create(['name' => 'Cushion']);
+        $catPerfume = Category::create(['name' => 'Nước Hoa']);
+        $catBlush = Category::create(['name' => 'Phấn Má']);
 
-        // 3. Seed Products
+        // =========================================================================
+        // 3. KHỞI TẠO DANH SÁCH SẢN PHẨM DIOR (PRODUCTS & IMAGES)
+        // =========================================================================
         $p1 = Product::create([
-            'category_id' => $catPhones->id,
-            'name' => 'iPhone 15 Pro Max 256GB',
-            'price' => 30990000,
-            'description' => 'Khung viền titan cao cấp, chip Apple A17 Pro mạnh mẽ, camera tiềm vọng 5x.',
-            'image' => null,
+            'category_id' => $catSon->id,
+            'name' => 'Son Thỏi Rouge Dior Velvet 999 Iconic Red',
+            'price' => 1350000,
+            'description' => 'Sắc đỏ kinh điển couture của Christian Dior với chất son nhung mịn lì, giữ màu tươi tắn suốt 16 giờ.',
+            'image' => 'products/dior-lipstick.jpg',
             'status' => 'Đang bán',
         ]);
 
         $p2 = Product::create([
-            'category_id' => $catPhones->id,
-            'name' => 'Samsung Galaxy S24 Ultra 256GB',
-            'price' => 27990000,
-            'description' => 'Màn hình phẳng tích hợp Galaxy AI đột phá, camera 200MP kèm bút S-Pen.',
-            'image' => null,
+            'category_id' => $catSon->id,
+            'name' => 'Son Kem Dior Addict Lip Tint Natural Berry',
+            'price' => 1200000,
+            'description' => 'Dòng son tint căng mọng tự nhiên, không lem, cung cấp độ ẩm dịu nhẹ cho đôi môi suốt 24 giờ.',
+            'image' => 'products/dior-tint.jpg',
             'status' => 'Đang bán',
         ]);
 
         $p3 = Product::create([
-            'category_id' => $catLaptops->id,
-            'name' => 'MacBook Air M2 13-inch 16GB/256GB',
-            'price' => 24500000,
-            'description' => 'Thiết kế siêu mỏng nhẹ, chip M2 cân bằng hiệu năng và thời lượng pin ấn tượng.',
-            'image' => null,
+            'category_id' => $catCushion->id,
+            'name' => 'Phấn Nước Dior Prestige Le Cushion Teint de Rose',
+            'price' => 2450000,
+            'description' => 'Cushion hoàng gia chiết xuất 500 cánh hoa hồng Granville, tái tạo làn da căng bóng mịn màng và kiêu sa.',
+            'image' => 'products/dior-cushion.jpg',
             'status' => 'Đang bán',
         ]);
 
         $p4 = Product::create([
-            'category_id' => $catLaptops->id,
-            'name' => 'Dell XPS 13 9315 Core i7',
-            'price' => 28000000,
-            'description' => 'Màn hình FHD+ sắc nét, thiết kế nhôm nguyên khối siêu bền bỉ.',
-            'image' => null,
-            'status' => 'Ngừng bán',
+            'category_id' => $catPerfume->id,
+            'name' => 'Nước Hoa Nữ Dior J’adore Eau de Parfum 100ml',
+            'price' => 4750000,
+            'description' => 'Tuyệt tác hương thơm quyến rũ bất hủ của Dior hòa quyện hoa ngọc lan tây, hoa hồng Đan Mạch và nhài Grasse.',
+            'image' => 'products/dior-perfume.jpg',
+            'status' => 'Đang bán',
         ]);
 
         $p5 = Product::create([
-            'category_id' => $catAccessories->id,
-            'name' => 'Tai nghe Apple AirPods Pro Gen 2',
-            'price' => 5490000,
-            'description' => 'Chống ồn chủ động gấp 2 lần, cổng sạc Type-C hiện đại.',
-            'image' => null,
+            'category_id' => $catPerfume->id,
+            'name' => 'Nước Hoa Nữ Miss Dior Eau de Parfum 100ml',
+            'price' => 4200000,
+            'description' => 'Bản giao hưởng ngát hương hoa linh lan, hoa mẫu đơn ngọt ngào thanh lịch và dải nơ couture thủ công lấp lánh.',
+            'image' => 'products/miss-dior.jpg',
             'status' => 'Đang bán',
         ]);
 
         $p6 = Product::create([
-            'category_id' => $catAccessories->id,
-            'name' => 'Chuột không dây Logitech MX Master 3S',
-            'price' => 2190000,
-            'description' => 'Cảm biến 8K DPI trên mọi bề mặt, nút bấm yên tĩnh 90%, cuộn MagSpeed siêu tốc.',
-            'image' => null,
+            'category_id' => $catBlush->id,
+            'name' => 'Phấn Má Hồng Dior Rosy Glow 001 Petal Pink',
+            'price' => 1450000,
+            'description' => 'Phấn má công nghệ Color Reviver phản ứng độc đáo theo độ ẩm da, mang lại đôi gò má ửng hồng trong trẻo tự nhiên.',
+            'image' => 'products/dior-blush.jpg',
             'status' => 'Đang bán',
         ]);
 
-        $p7 = Product::create([
-            'category_id' => $catOffice->id,
-            'name' => 'Máy in laser Canon LBP 2900',
-            'price' => 4350000,
-            'description' => 'Huyền thoại in ấn văn phòng, độ bền cao, chi phí mực siêu rẻ.',
-            'image' => null,
-            'status' => 'Đang bán',
-        ]);
+        // =========================================================================
+        // 4. KHỞI TẠO ĐƠN HÀNG MẪU & CHI TIẾT ĐƠN HÀNG (ORDERS & ORDER_ITEMS)
+        // =========================================================================
 
-        // 4. Seed Orders & Order Items
-        // Order 1 (created by sales1)
+        // Đơn hàng 1: Tạo bởi sales1, trạng thái Completed (Đã hoàn tất)
         $order1 = Order::create([
             'employee_id' => $sales1->id,
-            'customer_name' => 'Phạm Minh Đức',
+            'customer_name' => 'Trần Ngọc Bích',
             'customer_phone' => '0934111222',
-            'total_amount' => 36480000,
+            'total_amount' => 6100000,
             'status' => 'Completed',
         ]);
         OrderItem::create([
             'order_id' => $order1->id,
             'product_id' => $p1->id,
             'quantity' => 1,
-            'price' => 30990000,
+            'price' => 1350000,
         ]);
         OrderItem::create([
             'order_id' => $order1->id,
-            'product_id' => $p5->id,
+            'product_id' => $p4->id,
             'quantity' => 1,
-            'price' => 5490000,
+            'price' => 4750000,
         ]);
 
-        // Order 2 (created by sales1)
+        // Đơn hàng 2: Tạo bởi sales1, trạng thái Processing (Đang xử lý)
         $order2 = Order::create([
             'employee_id' => $sales1->id,
-            'customer_name' => 'Vũ Thị Mai Lan',
+            'customer_name' => 'Vũ Hoàng Yến Linh',
             'customer_phone' => '0978333444',
-            'total_amount' => 27990000,
+            'total_amount' => 3650000,
             'status' => 'Processing',
         ]);
         OrderItem::create([
             'order_id' => $order2->id,
             'product_id' => $p2->id,
             'quantity' => 1,
-            'price' => 27990000,
+            'price' => 1200000,
+        ]);
+        OrderItem::create([
+            'order_id' => $order2->id,
+            'product_id' => $p3->id,
+            'quantity' => 1,
+            'price' => 2450000,
         ]);
 
-        // Order 3 (created by sales2)
+        // Đơn hàng 3: Tạo bởi sales2, trạng thái Pending (Chờ xác nhận)
         $order3 = Order::create([
             'employee_id' => $sales2->id,
-            'customer_name' => 'Công ty TNHH Ánh Dương',
-            'customer_phone' => '0243888999',
-            'total_amount' => 33230000,
+            'customer_name' => 'Lê Thùy Dương',
+            'customer_phone' => '0918889999',
+            'total_amount' => 5650000,
             'status' => 'Pending',
         ]);
         OrderItem::create([
             'order_id' => $order3->id,
-            'product_id' => $p3->id,
+            'product_id' => $p5->id,
             'quantity' => 1,
-            'price' => 24500000,
+            'price' => 4200000,
         ]);
         OrderItem::create([
             'order_id' => $order3->id,
             'product_id' => $p6->id,
-            'quantity' => 2,
-            'price' => 2190000,
-        ]);
-        OrderItem::create([
-            'order_id' => $order3->id,
-            'product_id' => $p7->id,
             'quantity' => 1,
-            'price' => 4350000,
+            'price' => 1450000,
         ]);
     }
 }

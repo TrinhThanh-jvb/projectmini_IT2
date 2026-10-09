@@ -1,136 +1,117 @@
+{{-- 
+    View: Bảng điều khiển trung tâm (Dashboard).
+    Hiển thị các thẻ thống kê KPI (Sản phẩm, danh mục, đơn hàng, doanh thu),
+    tổng kết trạng thái đơn hàng, sơ đồ luồng kiến trúc (System Flow, Deploy Flow)
+    và danh sách các đơn đặt hàng mới nhất.
+--}}
 @extends('layouts.app')
 
 @section('title', 'Bảng điều khiển')
 @section('page_title', 'Bảng điều khiển hệ thống (Dashboard)')
 
 @section('content')
-<!-- Stat Cards -->
+{{-- ================= KHỐI THỐNG KÊ NHANH (STAT CARDS) ================= --}}
 <div class="stat-grid">
+    {{-- Thẻ 1: Tổng doanh thu từ các đơn hàng hoàn tất --}}
     <div class="stat-card">
         <div>
-            <div class="stat-title">Tổng sản phẩm</div>
-            <div class="stat-value">{{ number_format($totalProducts) }}</div>
+            <div class="stat-title">Doanh thu hoàn tất</div>
+            <div class="stat-value" style="font-size: 22px; color: var(--success); font-weight: 800;">
+                {{ number_format($totalRevenue) }} đ
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Đơn hàng Completed</div>
         </div>
-        <div class="stat-icon-wrapper bg-purple">📱</div>
+        <div class="stat-icon-wrapper bg-green">💰</div>
     </div>
 
-    <div class="stat-card">
-        <div>
-            <div class="stat-title">Danh mục</div>
-            <div class="stat-value">{{ number_format($totalCategories) }}</div>
-        </div>
-        <div class="stat-icon-wrapper bg-blue">📂</div>
-    </div>
-
-    <div class="stat-card">
+    {{-- Thẻ 2: Tổng số đơn hàng --}}
+    <a href="{{ route('orders.index') }}" class="stat-card" style="text-decoration: none; color: inherit;">
         <div>
             <div class="stat-title">
                 {{ auth()->user()->isManager() ? 'Tổng đơn toàn hệ thống' : 'Đơn hàng của tôi' }}
             </div>
             <div class="stat-value">{{ number_format($totalOrders) }}</div>
+            <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">Xem chi tiết ➔</div>
         </div>
-        <div class="stat-icon-wrapper bg-green">🛒</div>
-    </div>
+        <div class="stat-icon-wrapper bg-orange">🛍️</div>
+    </a>
 
-    <div class="stat-card">
+    {{-- Thẻ 3: Tổng số lượng sản phẩm Dior --}}
+    <a href="{{ route('products.index') }}" class="stat-card" style="text-decoration: none; color: inherit;">
         <div>
-            <div class="stat-title">Doanh thu hoàn tất</div>
-            <div class="stat-value" style="font-size: 20px; color: var(--success);">
-                {{ number_format($totalRevenue) }} đ
+            <div class="stat-title">Sản phẩm Dior</div>
+            <div class="stat-value">{{ number_format($totalProducts) }}</div>
+            <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">Quản lý kho hàng ➔</div>
+        </div>
+        <div class="stat-icon-wrapper bg-gold">💄</div>
+    </a>
+
+    {{-- Thẻ 4: Danh mục ngành hàng --}}
+    <a href="{{ route('categories.index') }}" class="stat-card" style="text-decoration: none; color: inherit;">
+        <div>
+            <div class="stat-title">Danh mục ngành hàng</div>
+            <div class="stat-value">{{ number_format($totalCategories) }}</div>
+            <div style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;">Xem danh mục ➔</div>
+        </div>
+        <div class="stat-icon-wrapper bg-rose">🏷️</div>
+    </a>
+</div>
+
+{{-- ================= TÓM TẮT TRẠNG THÁI ĐƠN HÀNG ================= --}}
+<div class="panel">
+    <div class="panel-header">
+        <div>
+            <h2 class="panel-title">Tình trạng xử lý đơn hàng</h2>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                Theo dõi tiến độ đơn hàng và xử lý vận đơn
             </div>
         </div>
-        <div class="stat-icon-wrapper bg-orange">💰</div>
-    </div>
-</div>
-
-<!-- Order Status Quick Summary -->
-<div class="panel">
-    <div class="panel-header">
-        <h2 class="panel-title">Tình trạng xử lý đơn hàng</h2>
-        <a href="{{ route('orders.create') }}" class="btn btn-primary btn-sm">
-            <span>➕ Tạo đơn hàng mới</span>
-        </a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ route('orders.create') }}" class="btn btn-primary btn-sm">
+                <span>➕ Tạo đơn hàng mới</span>
+            </a>
+            <a href="{{ route('products.create') }}" class="btn btn-secondary btn-sm">
+                <span>💄 Thêm sản phẩm</span>
+            </a>
+        </div>
     </div>
     <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-        <div style="background: var(--warning-light); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--warning);">
+        {{-- Số đơn Chờ xác nhận --}}
+        <div style="background: var(--warning-light); padding: 18px; border-radius: var(--radius-md); border-left: 4px solid var(--warning);">
             <div style="font-size: 13px; color: #b45309; font-weight: 600;">Chờ xác nhận (Pending)</div>
-            <div style="font-size: 24px; font-weight: 800; color: #92400e;">{{ $pendingCount }}</div>
+            <div style="font-size: 26px; font-weight: 800; color: #92400e; margin-top: 4px;">{{ $pendingCount }}</div>
         </div>
 
-        <div style="background: var(--primary-light); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--primary);">
-            <div style="font-size: 13px; color: #4338ca; font-weight: 600;">Đang xử lý (Processing)</div>
-            <div style="font-size: 24px; font-weight: 800; color: #3730a3;">{{ $processingCount }}</div>
+        {{-- Số đơn Đang xử lý --}}
+        <div style="background: var(--primary-light); padding: 18px; border-radius: var(--radius-md); border-left: 4px solid var(--primary);">
+            <div style="font-size: 13px; color: #be123c; font-weight: 600;">Đang xử lý (Processing)</div>
+            <div style="font-size: 26px; font-weight: 800; color: #9f1239; margin-top: 4px;">{{ $processingCount }}</div>
         </div>
 
-        <div style="background: var(--success-light); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--success);">
+        {{-- Số đơn Đã hoàn tất thành công --}}
+        <div style="background: var(--success-light); padding: 18px; border-radius: var(--radius-md); border-left: 4px solid var(--success);">
             <div style="font-size: 13px; color: #047857; font-weight: 600;">Đã hoàn thành (Completed)</div>
-            <div style="font-size: 24px; font-weight: 800; color: #065f46;">{{ $completedCount }}</div>
+            <div style="font-size: 26px; font-weight: 800; color: #065f46; margin-top: 4px;">{{ $completedCount }}</div>
         </div>
 
-        <div style="background: var(--danger-light); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--danger);">
+        {{-- Số đơn Đã hủy --}}
+        <div style="background: var(--danger-light); padding: 18px; border-radius: var(--radius-md); border-left: 4px solid var(--danger);">
             <div style="font-size: 13px; color: #b91c1c; font-weight: 600;">Đã hủy (Cancelled)</div>
-            <div style="font-size: 24px; font-weight: 800; color: #991b1b;">{{ $cancelledCount }}</div>
+            <div style="font-size: 26px; font-weight: 800; color: #991b1b; margin-top: 4px;">{{ $cancelledCount }}</div>
         </div>
     </div>
 </div>
 
-<!-- Architecture & Flow Knowledge (Requirement 8 & 10) -->
+{{-- ================= BẢNG DANH SÁCH ĐƠN HÀNG GẦN ĐÂY ================= --}}
 <div class="panel">
     <div class="panel-header">
-        <h2 class="panel-title">Sơ đồ luồng hệ thống & Quy trình Deploy (BRSE Kiến thức cốt lõi)</h2>
-    </div>
-    <div style="padding: 24px;">
-        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
-            1. Luồng xử lý Request trong Laravel MVC (System Flow)
-        </h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-            Ví dụ thao tác thêm sản phẩm hoặc duyệt đơn hàng:
-        </p>
-        <div class="flow-container">
-            <span class="flow-step">👤 Người dùng (Browser)</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">📝 Gửi Form / URL</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🚏 Route (web.php)</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">⚙️ Controller</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">📦 Model (Eloquent)</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🗄️ MySQL Database</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">📤 Response</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🖥️ Blade View (HTML)</span>
+        <div>
+            <h2 class="panel-title">Đơn hàng gần đây</h2>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                5 giao dịch đơn hàng mới nhất trong hệ thống
+            </div>
         </div>
-
-        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 24px; margin-bottom: 8px;">
-            2. Luồng triển khai Web Server thực tế (Deploy Flow)
-        </h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-            Khi người dùng truy cập tên miền dự án từ Internet:
-        </p>
-        <div class="flow-container">
-            <span class="flow-step">🌐 Tên miền (Domain)</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">📡 Phân giải DNS</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🚀 Web Server Nginx</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">⚡ PHP-FPM FastCGI</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🔥 Laravel Framework</span>
-            <span class="flow-arrow">➔</span>
-            <span class="flow-step">🗄️ MySQL Server</span>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Orders Table -->
-<div class="panel">
-    <div class="panel-header">
-        <h2 class="panel-title">Đơn hàng gần đây</h2>
-        <a href="{{ route('orders.index') }}" class="btn btn-secondary btn-sm">Xem tất cả đơn hàng</a>
+        <a href="{{ route('orders.index') }}" class="btn btn-secondary btn-sm">Xem tất cả đơn hàng ➔</a>
     </div>
     <div class="table-responsive">
         <table class="app-table">
@@ -147,6 +128,7 @@
                 </tr>
             </thead>
             <tbody>
+                {{-- Lặp qua 5 đơn hàng mới nhất --}}
                 @forelse($recentOrders as $order)
                     <tr>
                         <td><strong>#{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</strong></td>

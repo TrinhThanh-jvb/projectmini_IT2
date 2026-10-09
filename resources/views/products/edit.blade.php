@@ -1,3 +1,8 @@
+{{-- 
+    View: Chỉnh sửa thông tin sản phẩm (Products Edit).
+    Cho phép quản lý hoặc nhân viên bán hàng sửa đổi tên, danh mục, đơn giá,
+    trạng thái bán, thay thế ảnh đại diện mới và cập nhật nội dung mô tả sản phẩm.
+--}}
 @extends('layouts.app')
 
 @section('title', 'Chỉnh sửa sản phẩm')
@@ -5,22 +10,26 @@
 
 @section('content')
 <div class="panel">
+    {{-- Thanh tiêu đề khung và nút quay lại danh sách --}}
     <div class="panel-header">
         <h2 class="panel-title">Cập nhật thông tin</h2>
         <a href="{{ route('products.index') }}" class="btn btn-secondary btn-sm">Quay lại danh sách</a>
     </div>
 
     <div style="padding: 24px;">
+        {{-- Form cập nhật sản phẩm gửi request PUT tới ProductController::update --}}
         <form action="{{ route('products.update', $product) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="form-grid">
+                {{-- Tên sản phẩm --}}
                 <div class="form-group">
                     <label for="name" class="form-label">Tên sản phẩm <span style="color: red;">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $product->name) }}" required>
                 </div>
 
+                {{-- Chọn danh mục --}}
                 <div class="form-group">
                     <label for="category_id" class="form-label">Danh mục <span style="color: red;">*</span></label>
                     <select id="category_id" name="category_id" class="form-control" required>
@@ -32,11 +41,13 @@
                     </select>
                 </div>
 
+                {{-- Đơn giá bán --}}
                 <div class="form-group">
                     <label for="price" class="form-label">Đơn giá (VNĐ) <span style="color: red;">*</span></label>
                     <input type="number" id="price" name="price" step="1000" min="0" class="form-control" value="{{ old('price', $product->price) }}" required>
                 </div>
 
+                {{-- Trạng thái kinh doanh --}}
                 <div class="form-group">
                     <label for="status" class="form-label">Trạng thái kinh doanh <span style="color: red;">*</span></label>
                     <select id="status" name="status" class="form-control" required>
@@ -46,6 +57,7 @@
                 </div>
             </div>
 
+            {{-- Ảnh sản phẩm (hiển thị ảnh hiện tại nếu có kèm input chọn ảnh thay thế) --}}
             <div class="form-group">
                 <label for="image" class="form-label">Hình ảnh sản phẩm</label>
                 <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
@@ -57,11 +69,13 @@
                 <small style="color: var(--text-muted); font-size: 12px;">Tải lên ảnh mới nếu muốn thay đổi.</small>
             </div>
 
+            {{-- Mô tả sản phẩm --}}
             <div class="form-group">
                 <label for="description" class="form-label">Mô tả sản phẩm</label>
                 <textarea id="description" name="description" rows="5" class="form-control">{{ old('description', $product->description) }}</textarea>
             </div>
 
+            {{-- Nút bấm hủy và cập nhật --}}
             <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                 <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy bỏ</a>
                 <button type="submit" class="btn btn-primary">

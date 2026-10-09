@@ -1,3 +1,8 @@
+{{-- 
+    View: Quản lý hồ sơ cá nhân (Profile Page).
+    Cho phép nhân viên đang đăng nhập xem thông tin tài khoản cố định và cập nhật
+    thông tin liên hệ, ảnh đại diện, cũng như thay đổi mật khẩu đăng nhập.
+--}}
 @extends('layouts.app')
 
 @section('title', 'Hồ sơ cá nhân')
@@ -5,6 +10,7 @@
 
 @section('content')
 <div class="panel">
+    {{-- Thanh tiêu đề khung kèm huy hiệu vai trò của nhân viên --}}
     <div class="panel-header">
         <h2 class="panel-title">Thông tin tài khoản & Hồ sơ nhân viên</h2>
         <span class="badge {{ $employee->isManager() ? 'badge-info' : 'badge-success' }}">
@@ -13,12 +19,13 @@
     </div>
 
     <div style="padding: 24px;">
+        {{-- Form cập nhật hồ sơ với method PUT và enctype multipart để hỗ trợ upload ảnh --}}
         <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="form-grid">
-                <!-- Account details (Read only) -->
+                {{-- 1. Thông tin tài khoản hệ thống (Chỉ đọc - Read only) --}}
                 <div class="form-group">
                     <label class="form-label">Tên đăng nhập (Username)</label>
                     <input type="text" class="form-control" value="{{ $employee->username }}" disabled style="background: #f1f5f9;">
@@ -30,7 +37,7 @@
                     <input type="text" class="form-control" value="{{ $employee->status === 'active' ? 'Đang hoạt động' : 'Đã khóa' }}" disabled style="background: #f1f5f9;">
                 </div>
 
-                <!-- Profile details (Editable) -->
+                {{-- 2. Thông tin hồ sơ cá nhân (Cho phép chỉnh sửa) --}}
                 <div class="form-group">
                     <label for="name" class="form-label">Họ và tên <span style="color: red;">*</span></label>
                     <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $employee->profile->name ?? '') }}" required>
@@ -52,6 +59,7 @@
                 </div>
             </div>
 
+            {{-- Khu vực tải lên và xem trước ảnh đại diện --}}
             <div class="form-group" style="margin-top: 10px;">
                 <label for="avatar" class="form-label">Ảnh đại diện (Avatar)</label>
                 <div style="display: flex; align-items: center; gap: 16px;">
@@ -64,6 +72,7 @@
 
             <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
 
+            {{-- 3. Khu vực đổi mật khẩu mới (Nếu không nhập thì giữ nguyên mật khẩu cũ) --}}
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Đổi mật khẩu (Bỏ trống nếu không đổi)</h3>
             <div class="form-grid">
                 <div class="form-group">
@@ -77,6 +86,7 @@
                 </div>
             </div>
 
+            {{-- Nút lưu các thay đổi --}}
             <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
                     <span>💾 Lưu thay đổi</span>

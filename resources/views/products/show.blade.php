@@ -1,3 +1,12 @@
+{{-- 
+    View: Xem chi tiết sản phẩm (Products Show).
+    Hiển thị thông số cụ thể của sản phẩm:
+    - Ảnh lớn sản phẩm
+    - Danh mục và huy hiệu trạng thái kinh doanh
+    - Đơn giá niêm yết
+    - Mô tả sản phẩm chi tiết
+    - Lịch sử tạo, cập nhật và tổng số lượt sản phẩm đã được khách hàng đặt mua
+--}}
 @extends('layouts.app')
 
 @section('title', 'Chi tiết sản phẩm: ' . $product->name)
@@ -5,6 +14,7 @@
 
 @section('content')
 <div class="panel">
+    {{-- Header khung kèm nút Sửa và nút Quay lại --}}
     <div class="panel-header">
         <h2 class="panel-title">{{ $product->name }}</h2>
         <div style="display: flex; gap: 8px;">
@@ -15,7 +25,7 @@
 
     <div style="padding: 28px;">
         <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;">
-            <!-- Image Area -->
+            {{-- Khu vực hiển thị ảnh sản phẩm lớn --}}
             <div style="width: 280px; flex-shrink: 0;">
                 @if($product->image)
                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="width: 100%; height: 260px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
@@ -26,8 +36,9 @@
                 @endif
             </div>
 
-            <!-- Details Area -->
+            {{-- Khu vực hiển thị thông số và mô tả chi tiết --}}
             <div style="flex: 1; min-width: 280px;">
+                {{-- Danh mục và trạng thái --}}
                 <div style="margin-bottom: 16px;">
                     <span class="badge badge-info" style="font-size: 13px;">{{ $product->category->name ?? 'Chưa phân loại' }}</span>
                     @if($product->status === 'Đang bán')
@@ -37,10 +48,12 @@
                     @endif
                 </div>
 
+                {{-- Đơn giá nổi bật --}}
                 <div style="font-size: 30px; font-weight: 800; color: var(--primary); margin-bottom: 20px;">
                     {{ number_format($product->price) }} VNĐ
                 </div>
 
+                {{-- Khối văn bản mô tả --}}
                 <div style="background: #f8fafc; padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 24px;">
                     <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Mô tả sản phẩm</h3>
                     <p style="white-space: pre-line; color: var(--text-muted); font-size: 14px;">
@@ -48,6 +61,7 @@
                     </p>
                 </div>
 
+                {{-- Dữ liệu metadata & thống kê bán hàng --}}
                 <div style="font-size: 13px; color: var(--text-muted);">
                     <div>📅 Ngày tạo: <strong>{{ $product->created_at->format('d/m/Y H:i:s') }}</strong></div>
                     <div>🔄 Cập nhật lần cuối: <strong>{{ $product->updated_at->format('d/m/Y H:i:s') }}</strong></div>

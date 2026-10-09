@@ -1,3 +1,10 @@
+{{-- 
+    View: Xem chi tiết đơn hàng (Orders Show).
+    Bao gồm 3 khu vực chính:
+    1. Thông tin giao dịch (Khách hàng, Nhân viên phụ trách, Thời gian tạo) kèm Form đổi nhanh trạng thái đơn hàng (PATCH)
+    2. Khối tổng kết thanh toán (Tổng số tiền, tổng số lượng mặt hàng) kèm nút Xóa đơn
+    3. Bảng chi tiết từng món hàng (Tên sản phẩm, Danh mục, Đơn giá snapshot, Số lượng, Thành tiền) và dòng tổng cộng tfoot
+--}}
 @extends('layouts.app')
 
 @section('title', 'Chi tiết đơn hàng #' . str_pad($order->id, 4, '0', STR_PAD_LEFT))
@@ -5,10 +12,11 @@
 
 @section('content')
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: flex-start; margin-bottom: 24px;">
-    <!-- Customer & Staff Info -->
+    {{-- ================= KHỐI 1: THÔNG TIN KHÁCH HÀNG & NHÂN VIÊN ================= --}}
     <div class="panel">
         <div class="panel-header">
             <h2 class="panel-title">Thông tin giao dịch</h2>
+            {{-- Huy hiệu trạng thái đơn hàng --}}
             @if($order->status === 'Pending')
                 <span class="badge badge-warning">Pending (Chờ xác nhận)</span>
             @elseif($order->status === 'Processing')
@@ -33,7 +41,7 @@
 
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
 
-            <!-- Status update form -->
+            {{-- Form cập nhật nhanh trạng thái đơn hàng (gửi method PATCH tới OrderController::updateStatus) --}}
             <form action="{{ route('orders.updateStatus', $order) }}" method="POST">
                 @csrf
                 @method('PATCH')
@@ -51,12 +59,13 @@
         </div>
     </div>
 
-    <!-- Quick action & Summary -->
+    {{-- ================= KHỐI 2: TỔNG KẾT THANH TOÁN & THAO TÁC ================= --}}
     <div class="panel">
         <div class="panel-header">
             <h2 class="panel-title">Tổng kết thanh toán</h2>
             <div style="display: flex; gap: 8px;">
                 <a href="{{ route('orders.index') }}" class="btn btn-secondary btn-sm">Quay lại danh sách</a>
+                {{-- Form xóa đơn hàng có xác nhận --}}
                 <form action="{{ route('orders.destroy', $order) }}" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')">
                     @csrf
                     @method('DELETE')
@@ -76,7 +85,7 @@
     </div>
 </div>
 
-<!-- Order items table -->
+{{-- ================= KHỐI 3: BẢNG CHI TIẾT CÁC MẶT HÀNG TRONG ĐƠN HÀNG ================= --}}
 <div class="panel">
     <div class="panel-header">
         <h2 class="panel-title">Chi tiết các mặt hàng đã đặt</h2>
@@ -94,6 +103,7 @@
                 </tr>
             </thead>
             <tbody>
+                {{-- Lặp qua từng bản ghi OrderItem --}}
                 @foreach($order->orderItems as $index => $item)
                     <tr>
                         <td>{{ $index + 1 }}</td>
@@ -118,6 +128,7 @@
                 @endforeach
             </tbody>
             <tfoot>
+                {{-- Dòng chân bảng tính tổng cộng tiền đơn hàng --}}
                 <tr style="background: #f8fafc; font-weight: 800;">
                     <td colspan="5" style="text-align: right; font-size: 15px;">Tổng cộng:</td>
                     <td style="text-align: right; font-size: 16px; color: var(--primary);">
