@@ -20,13 +20,12 @@ class Category extends Model
 
     /**
      * Các trường được phép gán hàng loạt (Mass Assignment).
-     * Bắt buộc phải có 'name' để Eloquent cho phép Category::create() và tránh lỗi:
-     * SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'name' cannot be null.
+     * Bắt buộc khai báo 'name' để Eloquent cho phép Category::create() và tránh MassAssignmentException.
      * 
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', // Tên của danh mục sản phẩm (Đã khắc phục sau khi debug)
+        'name', // Tên của danh mục sản phẩm (Đã khắc phục lỗi Mass Assignment)
     ];
 
     /**

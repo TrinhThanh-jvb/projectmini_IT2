@@ -236,50 +236,38 @@ graph TD
 
 ## 8. Báo cáo Debug (Mục 9 trong yêu cầu)
 
-### Case 1: Bug chức năng – Không thể thêm mới danh mục sản phẩm (Category Store Bug)
+### Báo cáo sự cố: Không thể thêm mới danh mục sản phẩm (Mass Assignment Bug)
 
-- **Issue**: Người dùng nhập tên danh mục và nhấn nút *"Tạo danh mục"* thì hệ thống báo lỗi màn hình đỏ 500 hoặc ghi log: `Illuminate\Database\QueryException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'name' cannot be null (SQL: insert into categories (updated_at, created_at) values (...))`.
-- **Triệu chứng & Các bước tái hiện (Steps to Reproduce)**:
+- **Vấn đề (Issue)**: Khi người dùng nhập tên danh mục và nhấn nút *"Tạo danh mục"*, hệ thống không lưu được và ném ngoại lệ báo lỗi hệ thống.
+- **Hiện tượng & Các bước tái hiện**:
   1. Đăng nhập hệ thống bằng tài khoản quản lý (`admin`).
   2. Truy cập menu **Danh mục** (`/categories`).
-  3. Tại form *Thêm danh mục mới*, nhập tên danh mục (ví dụ: `Son dưỡng`) và bấm **➕ Tạo danh mục**.
-  4. Hệ thống không chuyển trang thành công mà ném lỗi đỏ `500 Server Error` (SQLSTATE[23000]).
-- **Mã lỗi & Log chi tiết**:
+  3. Tại form *Thêm danh mục mới*, nhập tên danh mục (ví dụ: `Son Dưỡng Dior Addict`) và bấm **➕ Tạo danh mục**.
+  4. Hệ thống báo lỗi và ghi nhận ngoại lệ vào file log hệ thống.
+- **Nội dung thông báo lỗi trong Log (`storage/logs/laravel.log`)**:
   ```text
-  SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'name' cannot be null 
-  (Connection: mysql, SQL: insert into `categories` (`updated_at`, `created_at`) values (2026-10-09 10:48:00, 2026-10-09 10:48:00))
-  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:760
+  local.ERROR: Add [name] to fillable property to allow mass assignment on [App\Models\Category]. 
+  {"exception":"[object] (Illuminate\\Database\\Eloquent\\MassAssignmentException(code: 0): 
+  Add [name] to fillable property to allow mass assignment on [App\\Models\\Category]. 
+  at C:/laragon/www/Project_mini/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:525)
+  [stacktrace]
+  #0 ...
+  #6 C:/laragon/www/Project_mini/app/Http/Controllers/CategoryController.php(48): Illuminate\\Database\\Eloquent\\Model::create(...)
   ```
-- **Quy trình điều tra & Debug (Investigation Steps)**:
-  1. *Bước 1 - Kiểm tra dữ liệu Form gửi lên*: Đặt `dd($request->all());` tại đầu hàm `CategoryController::store()`. Kết quả cho thấy dữ liệu `name` vẫn được truyền từ View lên Controller hoàn toàn đầy đủ (`['name' => 'Son dưỡng']`).
-  2. *Bước 2 - Kiểm tra kết quả Validate*: Đặt `dd($validated);` sau lệnh `$request->validate(...)`. Kết quả dữ liệu sau validate vẫn hợp lệ.
-  3. *Bước 3 - Kiểm tra câu lệnh SQL thực thi*: Bật `\DB::enableQueryLog();` trước câu lệnh `Category::create($validated);` và in `dd(\DB::getQueryLog());`. Phát hiện câu lệnh SQL được sinh ra là `insert into categories (updated_at, created_at) values (?, ?)` mà **hoàn toàn không có cột `name`**.
-  4. *Bước 4 - Kiểm tra Model*: Mở file `app/Models/Category.php`, kiểm tra thuộc tính `$fillable`. Phát hiện thuộc tính `'name'` bị thiếu (hoặc đang bị comment).
-- **Nguyên nhân gốc rễ (Root Cause Analysis - RCA)**:
-  - Eloquent ORM của Laravel áp dụng cơ chế bảo mật **Mass Assignment Protection**. Mọi trường dữ liệu truyền vào hàm `Model::create()` hoặc `Model::update()` đều phải được khai báo tường minh trong mảng `protected $fillable`.
-  - Khi mảng `$fillable` không có trường `'name'`, Eloquent tự động lọc bỏ trường này để tránh gán hàng loạt nguy hiểm.
-  - Trong khi đó, bảng `categories` trong MySQL (tạo bởi migration) quy định cột `name` là `NOT NULL` và không có giá trị mặc định (`DEFAULT`). Khi câu INSERT thiếu cột `name`, MySQL lập tức từ chối và ném mã lỗi `1048 Integrity constraint violation`.
-- **Cách khắc phục (Fix Implementation)**:
-  - Mở file `app/Models/Category.php`, bổ sung trường `'name'` vào mảng `$fillable`:
-    ```php
-    protected $fillable = [
-        'name', // Cho phép gán hàng loạt tên danh mục
-    ];
-    ```
+- **Quy trình điều tra & Phân tích nguyên nhân (Root Cause Analysis)**:
+  1. **Kiểm tra Controller**: Tại hàm `CategoryController::store()`, dữ liệu form gửi lên được validate hợp lệ qua `$request->validate(...)` và truyền vào `Category::create($validated)`.
+  2. **Nguyên nhân cốt lõi**: Eloquent ORM của Laravel áp dụng cơ chế bảo mật **Mass Assignment Protection** (chống gán hàng loạt thuộc tính ngoài ý muốn). Khi gọi hàm `Model::create()`, Eloquent bắt buộc các trường dữ liệu phải được khai báo trong biến `protected $fillable` của Model tương ứng.
+  3. Do trong Model `app/Models/Category.php`, trường `'name'` chưa được khai báo trong `$fillable`, Laravel đã chủ động chặn lại và ném ra lỗi `MassAssignmentException` để đảm bảo an toàn dữ liệu.
+- **Cách khắc phục (Fix)**:
+  Mở file `app/Models/Category.php`, thêm trường `'name'` vào mảng `protected $fillable`:
+  ```php
+  protected $fillable = [
+      'name', // Cho phép gán hàng loạt tên danh mục
+  ];
+  ```
 - **Kết quả kiểm thử lại (Verification)**:
-  - Thực hiện gửi lại form tạo danh mục `Son dưỡng`.
-  - Hệ thống thực thi câu SQL: `insert into categories (name, updated_at, created_at) values ('Son dưỡng', ...)`.
-  - Dữ liệu được lưu thành công vào MySQL, hệ thống redirect về trang danh sách kèm thông báo màu xanh: *"Thêm danh mục mới thành công!"*.
-
----
-
-### Case 2: Bug môi trường – Lỗi xác thực SSL cURL khi cài đặt Composer Package
-
-- **Issue**: Lỗi `cURL error 60: SSL certificate problem: unable to get local issuer certificate` khi chạy `composer` tải package cài đặt Laravel.
-- **Nguyên nhân**: Trên máy tính cài phần mềm diệt virus Avast. Tính năng Web/Mail Shield của Avast thực hiện quét SSL bằng cách tạo chứng chỉ Root Certificate tự ký (`Avast Web/Mail Shield Root`) đưa vào Windows Certificate Store, nhưng file `C:\laragon\etc\ssl\cacert.pem` mặc định của Laragon/PHP chưa có chứng chỉ này.
-- **Cách điều tra**: Viết script PHP kiểm tra kết nối SSL verbose và dùng OpenSSL kiểm tra chuỗi chứng chỉ gửi về (`peer_certificate_chain`). Xác định được Issuer là `Avast Web/Mail Shield Root`.
-- **Cách xử lý**: Dùng PowerShell trích xuất chứng chỉ gốc `Avast Web/Mail Shield Root` từ Windows Certificate Store và append (nối) vào file `C:\laragon\etc\ssl\cacert.pem` của Laragon.
-- **Kết quả**: cURL và Composer xác thực SSL thành công 100%, kết nối Packagist ổn định và cài đặt toàn bộ dependencies bình thường.
+  - Quay lại giao diện tạo danh mục và bấm *"Tạo danh mục"*.
+  - Hệ thống thực thi thành công, lưu bản ghi mới vào cơ sở dữ liệu MySQL và chuyển hướng về danh sách kèm thông báo: *"Thêm danh mục mới thành công!"*.
 
 ---
 
